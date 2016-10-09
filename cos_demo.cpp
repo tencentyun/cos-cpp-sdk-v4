@@ -1,5 +1,4 @@
 #include "CosApi.h"
-#include "request/FileUploadReq.h"
 #include "CosConfig.h"
 #include "CosParams.h"
 #include "CosDefines.h"
