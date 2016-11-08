@@ -10,29 +10,36 @@ namespace qcloud_cos {
 
 CosConfig::CosConfig(const string & config_file)
 {
+    InitConf(config_file);
+}
+
+bool CosConfig::InitConf(const std::string& config_file) {
     Json::Value root;
     Json::Reader reader;
     std::ifstream is(config_file.c_str(), std::ios::in);
-    if (!is) {
+    if (!is || !is.is_open()) {
         std::cout << "open config file fail " << config_file << std::endl;
-        return;
+        return false;
     }
 
     if (!reader.parse(is, root, false))
     {
         std::cout << "parse config file fail " << config_file << std::endl;
-        return;
+        is.close();
+        return false;
     }
+
+    is.close();
 
     if (root.isMember("AppID")) {
         this->appid = root["AppID"].asUInt64();
     }
 
-    if (root.isMember("SecretID")) { 
+    if (root.isMember("SecretID")) {
         this->secret_id  = root["SecretID"].asString();
     }
 
-    if (root.isMember("SecretKey")) { 
+    if (root.isMember("SecretKey")) {
         this->secret_key = root["SecretKey"].asString();
     }
 
@@ -94,6 +101,7 @@ CosConfig::CosConfig(const string & config_file)
     }
 
     CosSysConfig::print_value();
+    return true;
 }
 
 uint64_t CosConfig::getAppid() const

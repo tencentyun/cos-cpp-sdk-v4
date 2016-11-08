@@ -31,7 +31,7 @@ int FileOp::FileDownload(FileDownloadReq& req, char* buffer, size_t bufLen, uint
         *ret_code = -2;
         return 0;
     }
-    
+
     //多次签名
     uint64_t expired = FileUtil::GetExpiredTime();
     string sign = Auth::AppSignMuti(getAppid(),getSecretID(),getSecretKey(),
@@ -40,12 +40,12 @@ int FileOp::FileDownload(FileDownloadReq& req, char* buffer, size_t bufLen, uint
     string url = "";
     if (CosSysConfig::getDownloadDomainType() == DOMAIN_COS){
         url = HttpUtil::GetEncodedDownloadCosUrl(getAppid(),req.getBucket(),req.getFilePath(),
-                                CosSysConfig::getDownloadDomain(),sign);        
+                                CosSysConfig::getDownloadDomain(),sign);
     } else if (CosSysConfig::getDownloadDomainType() == DOMAIN_CDN) {
         url = HttpUtil::GetEncodedDownloadCosUrl(getAppid(),req.getBucket(),req.getFilePath(),
                                 CosSysConfig::getDownloadDomain(),sign);
     } else if (CosSysConfig::getDownloadDomainType() == DOMAIN_SELF_DOMAIN) {
-        url = HttpUtil::GetEncodedDownloadCosUrl(CosSysConfig::getDownloadDomain(),req.getFilePath(),sign);    
+        url = HttpUtil::GetEncodedDownloadCosUrl(CosSysConfig::getDownloadDomain(),req.getFilePath(),sign);
     }
 
     SDK_LOG_DBG("url:%s", url.c_str());
@@ -92,9 +92,13 @@ string FileOp::FileUpload(FileUploadReq& req)
 }
 
 //文件下载(异步)
-bool FileOp::FileDownloadAsyn(FileOp& op, const FileDownloadReq& req, char* buffer, size_t bufLen, DownloadCallback callback)
+bool FileOp::FileDownloadAsyn(FileOp& op,
+                              const FileDownloadReq& req,
+                              char* buffer, size_t bufLen,
+                              DownloadCallback callback,
+                              void* user_data)
 {
-    Download_Asyn_Arg arg(&op, req, buffer, bufLen, callback);
+    Download_Asyn_Arg arg(&op, req, buffer, bufLen, callback, user_data);
     if (threadpool){
         threadpool->schedule(boost::bind(FileDownload_Asyn_Thread, arg));//会复制一份arg
     } else {
@@ -106,13 +110,15 @@ bool FileOp::FileDownloadAsyn(FileOp& op, const FileDownloadReq& req, char* buff
 }
 
 //文件下载(异步)
-extern "C" 
+extern "C"
 void FileDownload_Asyn_Thread(Download_Asyn_Arg arg)
 {
 
     FileOp* op = arg.m_op;
     FileDownloadReq  req = arg.m_req;
     DownloadCallback callback = arg.m_callback;
+    void* user_data = arg.m_user_data;
+
     char *buffer = arg.m_buffer;
     size_t bufLen = arg.m_bufLen;
 
@@ -123,18 +129,18 @@ void FileDownload_Asyn_Thread(Download_Asyn_Arg arg)
 
         if (callback){
             string fail_msg = "download("+ req.getFilePath() + ") fail";
-            DownloadCallBackArgs cb_arg(req, buffer, bufLen, 0, -1, fail_msg);
+            DownloadCallBackArgs cb_arg(req, buffer, bufLen, 0, -1, fail_msg, user_data);
             callback(cb_arg);
         } else {
             SDK_LOG_WARN("download call back null");
         }
 
-        return;    
+        return;
     }
 
     size_t data_size = 0;
     int ret_code = 0;
-    DownloadCallBackArgs cb_arg(req, buffer, bufLen, data_size, 0, succ_msg);
+    DownloadCallBackArgs cb_arg(req, buffer, bufLen, data_size, 0, succ_msg, user_data);
     data_size = op->FileDownload(req, buffer, bufLen, 0, &ret_code);
     if (ret_code == 0){
         succ_msg = "download file(" + req.getFilePath() + "), success, size=" + StringUtil::IntToString(data_size);
@@ -156,13 +162,13 @@ void FileDownload_Asyn_Thread(Download_Asyn_Arg arg)
     return;
 }
 
-extern "C" 
+extern "C"
 void FileUpload_Asyn_Thread(Upload_Asyn_Arg arg)
 {
-
     FileOp* op              = arg.m_op;
     FileUploadReq  req      = arg.m_req;
     UploadCallback callback = arg.m_callback;
+    void* user_data         = arg.m_user_data;
 
     Json::Value rsp_json;
     rsp_json["code"] = 0;
@@ -174,7 +180,8 @@ void FileUpload_Asyn_Thread(Upload_Asyn_Arg arg)
         rsp_json["code"] = -2;
         rsp_json["message"] = "sdk inter error, fileUpload(" + req.getDstPath() + ") fail";;
         if (callback){
-            UploadCallBackArgs cb_arg(req, StringUtil::JsonToString(rsp_json));
+            UploadCallBackArgs cb_arg(req, StringUtil::JsonToString(rsp_json),
+                                      -2, user_data);
             callback(cb_arg);
         } else {
             SDK_LOG_WARN("download call back null");
@@ -190,8 +197,14 @@ void FileUpload_Asyn_Thread(Upload_Asyn_Arg arg)
         rsp = op->FileUploadSlice(req);
     }
 
+    Json::Value root_json = StringUtil::StringToJson(rsp);
+    int code = -1;
+    if (root_json.isMember("code")) {
+        code = root_json["code"].asInt();
+    }
+
     if (callback){
-        UploadCallBackArgs cb_arg(req, rsp);
+        UploadCallBackArgs cb_arg(req, rsp, code, user_data);
         callback(cb_arg);
     } else {
         SDK_LOG_ERR("upload callback null");
@@ -200,10 +213,56 @@ void FileUpload_Asyn_Thread(Upload_Asyn_Arg arg)
     return;
 }
 
-//文件上传(异步)
-bool FileOp::FileUploadAsyn(FileOp& op, const FileUploadReq& req, UploadCallback callback)
+extern "C"
+void FileDelete_Asyn_Thread(Delete_Asyn_Arg arg)
 {
-    Upload_Asyn_Arg arg(&op, req, callback);
+    FileOp* op              = arg.m_op;
+    FileDeleteReq  req      = arg.m_req;
+    DeleteCallback callback = arg.m_callback;
+    void* user_data         = arg.m_user_data;
+
+    Json::Value rsp_json;
+    rsp_json["code"] = 0;
+    rsp_json["message"] = "";
+    rsp_json["data"] = "";
+
+    if (!op){
+        SDK_LOG_ERR("op is null");
+        rsp_json["code"] = -2;
+        rsp_json["message"] = "sdk inter error, fileDelete(" + req.getFormatPath() + ") fail";;
+        if (callback){
+            DeleteCallBackArgs cb_arg(req, StringUtil::JsonToString(rsp_json), -2, user_data);
+            callback(cb_arg);
+        } else {
+            SDK_LOG_WARN("download call back null");
+        }
+
+        return;
+    }
+
+    string rsp = op->FileDelete(req);
+    Json::Value root_json = StringUtil::StringToJson(rsp);
+    int code = -1;
+    if (root_json.isMember("data")) {
+        code = root_json["data"].asInt();
+    }
+
+    if (callback){
+        DeleteCallBackArgs cb_arg(req, rsp, code, user_data);
+        callback(cb_arg);
+    } else {
+        SDK_LOG_ERR("upload callback null");
+    }
+    return;
+}
+
+//文件上传(异步)
+bool FileOp::FileUploadAsyn(FileOp& op,
+                            const FileUploadReq& req,
+                            UploadCallback callback,
+                            void* user_data)
+{
+    Upload_Asyn_Arg arg(&op, req, callback, user_data);
     if (threadpool) {
         threadpool->schedule(boost::bind(FileUpload_Asyn_Thread, arg));
     } else {
@@ -276,7 +335,7 @@ string FileOp::FileUploadSlice(FileUploadReq& req)
     if (req.isBufferUpload())
     {
         ret.setCode(PARA_ERROR_CODE);
-        ret.setMessage("not support buffer upload larger than 8M");           
+        ret.setMessage("not support buffer upload larger than 8M");
         return ret.toJsonString();
     }
 
@@ -497,7 +556,7 @@ string FileOp::FileUploadSliceFinish(FileUploadReq& req, string& dataRspJson)
 string FileOp::FileUploadSliceList(FileUploadReq& req)
 {
     SDK_LOG_DBG("req: %s", req.toJsonString().c_str());
-    
+
     string bucket = req.getBucket();
     //多次签名
     uint64_t expired = FileUtil::GetExpiredTime();
@@ -520,7 +579,7 @@ string FileOp::FileUploadSliceList(FileUploadReq& req)
 string FileOp::FileUpdate(FileUpdateReq& req)
 {
     SDK_LOG_DBG("req: %s", req.toJsonString().c_str());
-    
+
     CosResult ret;
     if (!req.isParaValid(ret))
     {
@@ -539,7 +598,7 @@ string FileOp::FileUpdate(FileUpdateReq& req)
     Json::Value body;
     body[PARA_OP] = OP_UPDATE;
     if (req.isUpdateForBid()){
-        body[PARA_FORBID] = req.getForbid();    
+        body[PARA_FORBID] = req.getForbid();
     }
     if (req.isUpdateAuthority()){
         body[PARA_AUTHORITY] = req.getAuthority();
@@ -555,14 +614,14 @@ string FileOp::FileUpdate(FileUpdateReq& req)
             body[PARA_CUSTOM_HEADERS][iter->first] = iter->second;
         }
     }
-    string bodyJson = StringUtil::JsonToString(body);    
+    string bodyJson = StringUtil::JsonToString(body);
     return HttpSender::SendJsonBodyPostRequest(fullUrl, bodyJson, http_headers);
 }
 
 string FileOp::FileStat(FileStatReq& req)
 {
     SDK_LOG_DBG("req: %s", req.toJsonString().c_str());
-    
+
     CosResult ret;
     if (!req.isParaValid(ret))
     {
@@ -578,7 +637,7 @@ string FileOp::FileStat(FileStatReq& req)
 string FileOp::FileDelete(FileDeleteReq& req)
 {
     SDK_LOG_DBG("req: %s", req.toJsonString().c_str());
-    
+
     CosResult ret;
     if (!req.isParaValid(ret))
     {
@@ -587,16 +646,31 @@ string FileOp::FileDelete(FileDeleteReq& req)
     return delBase(req.getBucket(), req.getFilePath());
 }
 
+bool FileOp::FileDeleteAsyn(FileOp& op,
+                            const FileDeleteReq& req,
+                            DeleteCallback callback,
+                            void* user_data) {
+    Delete_Asyn_Arg arg(&op, req, callback, user_data);
+    if (threadpool) {
+        threadpool->schedule(boost::bind(FileDelete_Asyn_Thread, arg));
+    } else {
+        SDK_LOG_ERR("threadpool is null, error");
+        return false;
+    }
+
+    return true;
+}
+
 string FileOp::FileMove(FileMoveReq& req)
 {
     SDK_LOG_DBG("req: %s", req.toJsonString().c_str());
- 
+
     CosResult ret;
     if (!req.isParaValid(ret))
     {
         return ret.toJsonString();
     }
-    
+
     string bucket = req.getBucket();
     string formatPath = req.getFormatPath();
 

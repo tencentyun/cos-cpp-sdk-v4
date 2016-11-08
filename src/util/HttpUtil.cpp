@@ -17,13 +17,13 @@ string HttpUtil::GetEncodedCosUrl(const string& endpoint,
     char urlBytes[10240];
     snprintf(urlBytes, sizeof(urlBytes),
 #if __WORDSIZE == 64
-             "/%lu/%s/%s",
+     "/%lu/%s/%s",
 #else
-             "/%lu/%s/%s",
+     "/%llu/%s/%s",
 #endif
-             appid,
-             bucketName.c_str(),
-             dstPath.c_str());
+     appid,
+     bucketName.c_str(),
+     dstPath.c_str());
 
     string url_str(urlBytes);
     return endpoint + FileUtil::EncodePath(url_str);
@@ -71,7 +71,7 @@ string HttpUtil::GetEncodedDownloadCosUrl(
 #if __WORDSIZE == 64
      "%s-%lu.%s/%s",
 #else
-     "%s-%lu.%s/%s",
+     "%s-%llu.%s/%s",
 #endif
      bucketName.c_str(),
      appid,
@@ -96,7 +96,7 @@ string HttpUtil::GetEncodedDownloadCosCdnUrl(
 #if __WORDSIZE == 64
      "%s/files/v2/%lu/%s/%s",
 #else
-     "%s/files/v2/%lu/%s/%s",
+     "%s/files/v2/%llu/%s/%s",
 #endif
      domain.c_str(),
      appid,

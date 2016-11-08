@@ -28,13 +28,13 @@ std::string Auth::AppSignOnce(uint64_t app_id,
     char file_id[2048];
     snprintf(file_id, sizeof(file_id),
 #if __WORDSIZE == 64
-             "/%lu/%s%s",
+     "/%lu/%s%s",
 #else
-             "/%llu/%s%s",
+     "/%llu/%s%s",
 #endif
-             app_id,
-             bucket_name.c_str(),
-             urlencode_path.c_str());
+     app_id,
+     bucket_name.c_str(),
+     urlencode_path.c_str());
 
     return AppSignInternal(app_id, secret_id, secret_key, 0, file_id, bucket_name);
 }
@@ -55,12 +55,12 @@ std::string Auth::AppSignInternal(uint64_t app_id,
     char plain_text_char[10240];
     unsigned int input_length = snprintf(plain_text_char, 10240,
 #if __WORDSIZE == 64
-                                         "a=%lu&k=%s&e=%lu&t=%lu&r=%lu&f=%s&b=%s",
+     "a=%lu&k=%s&e=%lu&t=%lu&r=%lu&f=%s&b=%s",
 #else
-                                         "a=%llu&k=%s&e=%llu&t=%lu&r=%llu&f=%s&b=%s",
+     "a=%llu&k=%s&e=%llu&t=%lu&r=%llu&f=%s&b=%s",
 #endif
-                                         app_id, secret_id.c_str(), expired_time,
-                                         now, rdm, file_id.c_str(), bucket_name.c_str());
+     app_id, secret_id.c_str(), expired_time,
+     now, rdm, file_id.c_str(), bucket_name.c_str());
 
     std::string plain_text(plain_text_char, input_length);
     std::string hmac_digest = CodecUtil::HmacSha1(plain_text, secret_key);

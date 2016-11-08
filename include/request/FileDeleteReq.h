@@ -13,11 +13,9 @@ public:
     }
 
     virtual bool isParaValid(CosResult &cosResult);
-    string getFormatPath();    
+    string getFormatPath();
     string toJsonString();
     string getFilePath();
-
-private:
     FileDeleteReq();
 private:
     string path;

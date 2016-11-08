@@ -20,6 +20,10 @@ bool FolderListReq::isLegalFolderPath()
     return FileUtil::isLegalFolderPath(this->path);
 }
 
+void FolderListReq::setContext(string& context) {
+        this->context = context;
+}
+
 string FolderListReq::getFormatFolderPath()
 {
     return FileUtil::FormatFolderPath(this->path);

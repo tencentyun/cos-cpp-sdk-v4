@@ -31,15 +31,19 @@ class CosAPI
         //文件上传
         string FileUpload(FileUploadReq& req);
         //文件上传(异步)(callback的入参需要客户端端进行释放)
-        bool FileUploadAsyn(FileUploadReq& req, UploadCallback callback);
+        bool FileUploadAsyn(FileUploadReq& req, UploadCallback callback, void* user_data = NULL);
         //文件下载
         int FileDownload(FileDownloadReq& req, char* buffer, size_t bufLen, uint64_t offset, int* ret_code);
         //文件下载(异步)(callback的入参需要客户端端进行释放)
-        bool FileDownloadAsyn(FileDownloadReq& req, char* buffer, size_t bufLen, DownloadCallback callback);        
+        bool FileDownloadAsyn(FileDownloadReq& req, char* buffer,
+                              size_t bufLen, DownloadCallback callback,
+                              void* user_data = NULL);
         //文件查询
         string FileStat(FileStatReq& req);
         //文件删除
         string FileDelete(FileDeleteReq& req);
+        // 异步删除文件
+        bool FileDeleteAsyn(FileDeleteReq& req, DeleteCallback callback, void* user_data = NULL);
         //文件更新
         string FileUpdate(FileUpdateReq& req);
         //目录创建

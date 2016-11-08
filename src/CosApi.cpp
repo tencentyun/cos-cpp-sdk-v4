@@ -16,14 +16,14 @@ int CosAPI::FileDownload(FileDownloadReq& request, char* buffer, size_t bufLen, 
     return fileOp.FileDownload(request, buffer, bufLen, offset, ret_code);
 }
 
-bool CosAPI::FileDownloadAsyn(FileDownloadReq& request, char* buffer, size_t bufLen,DownloadCallback callback)
+bool CosAPI::FileDownloadAsyn(FileDownloadReq& request, char* buffer, size_t bufLen,DownloadCallback callback, void* user_data)
 {
-    return fileOp.FileDownloadAsyn(fileOp, request, buffer, bufLen, callback);
+    return fileOp.FileDownloadAsyn(fileOp, request, buffer, bufLen, callback, user_data);
 }
 
-bool CosAPI::FileUploadAsyn(FileUploadReq& request, UploadCallback callback)
+bool CosAPI::FileUploadAsyn(FileUploadReq& request, UploadCallback callback, void* user_data)
 {
-    return fileOp.FileUploadAsyn(fileOp, request, callback);
+    return fileOp.FileUploadAsyn(fileOp, request, callback, user_data);
 }
 
 string CosAPI::FileUpload(FileUploadReq& request)
@@ -40,6 +40,11 @@ string CosAPI::FileDelete(FileDeleteReq& request)
 {
     return fileOp.FileDelete(request);
 }
+
+bool CosAPI::FileDeleteAsyn(FileDeleteReq& req, DeleteCallback callback, void* user_data) {
+    return fileOp.FileDeleteAsyn(fileOp, req, callback, user_data);
+}
+
 string CosAPI::FileUpdate(FileUpdateReq& request)
 {
     return fileOp.FileUpdate(request);
@@ -76,7 +81,7 @@ CosAPI::~CosAPI()
 }
 
 int CosAPI::COS_Init() {
-    SimpleMutexLocker locker(&init_mutex);   
+    SimpleMutexLocker locker(&init_mutex);
     ++cos_obj_num;
     if (!g_init) {
         g_init = true;

@@ -18,6 +18,7 @@ public:
 
     virtual bool isParaValid(CosResult &cosResult);
     bool isLegalFolderPath();
+    void setContext(string& context);
     string getFormatFolderPath();
     string getListPath();
     int getListFlag();

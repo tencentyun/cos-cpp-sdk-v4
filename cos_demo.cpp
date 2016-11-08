@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <iostream>
+#include <sstream>
 #include <string>
 
 using std::string;
@@ -34,13 +35,45 @@ void upload_callback(UploadCallBackArgs arg)
     SDK_LOG_DBG("upload callback...rsp:%s",rsp.c_str());
     return;
 }
+
+struct TestData {
+    std::string m_name;
+    int m_age;
+    TestData(const std::string& name, int age) : m_name(name), m_age(age) {}
+
+    std::string ToString() {
+        std::ostringstream oss;
+        oss << "name: " << m_name << ", age: " << m_age;
+        return oss.str();
+    }
+};
+
+void upload_callback_with_user_data(UploadCallBackArgs arg) {
+    string rsp = arg.m_rsp;
+
+    SDK_LOG_DBG("upload callback with user_data ...rsp:%s, code:%d",rsp.c_str(), arg.m_code);
+    if (arg.m_user_data != NULL) {
+        TestData* tmp = static_cast<TestData*>(arg.m_user_data);
+        SDK_LOG_DBG("upload callback with user_data ...user_data:%s", tmp->ToString().c_str());
+    }
+    return;
+}
+
+void delete_callback(DeleteCallBackArgs arg)
+{
+    string rsp = arg.m_rsp;
+
+    SDK_LOG_DBG("Delete callback...rsp:%s",rsp.c_str());
+    return;
+}
+
 }
 
 int main()
 {
-    string bucket = "jimmyyan";
-    string srcpath = "../testdata/test1";
-    string srcpath2 = "../testdata/test2";
+    string bucket = "rabbitliu";
+    string srcpath = "./testdata/test1";
+    string srcpath2 = "./testdata/test2";
     string dstpath = "/test1";
     string dstpath2 = "/test2";
     string folder = "/testdata/";
@@ -59,7 +92,8 @@ int main()
 
     FileUploadReq fileUploadReq2(bucket,srcpath2, dstpath2);
     fileUploadReq2.setInsertOnly(0);
-    cos.FileUploadAsyn(fileUploadReq2, upload_callback);
+    TestData test_data("userliu", 10);
+    cos.FileUploadAsyn(fileUploadReq2, upload_callback_with_user_data, &test_data);
 
     sleep(1);
 
@@ -67,9 +101,9 @@ int main()
     FileDownloadReq fileDownloadReq(bucket,dstpath);
     int ret_code;
     uint64_t size = cos.FileDownload(fileDownloadReq, buf, 1024, 100, &ret_code);
-    
+
     cos.FileDownloadAsyn(fileDownloadReq, buf, 1024, download_callback);
-    
+
     char buf2[1024];
     FileDownloadReq fileDownloadReq2(bucket,dstpath2);
     bool f2 = cos.FileDownloadAsyn(fileDownloadReq2,buf2,1024, download_callback);
@@ -119,7 +153,7 @@ int main()
     fileUpdateReq.setForbid(0);
     fileUpdateReq.setCustomHeader(custom_header);
     ret = cos.FileUpdate(fileUpdateReq);
-    cout << ret <<endl;    
+    cout << ret <<endl;
 
     //文件查询
     FileStatReq fileStatReq(bucket,dstpath);
@@ -132,12 +166,16 @@ int main()
     cout << ret <<endl;
 
     //文件删除
-    FileDeleteReq fileDeleteReq(bucket,dstpath);
+    FileDeleteReq fileDeleteReq(bucket, dstpath);
     ret = cos.FileDelete(fileDeleteReq);
-    cout << ret <<endl;  
+    cout << ret <<endl;
+    // 异步删除
+    FileDeleteReq fileDeleteReq2(bucket, dstpath2);
+    ret = cos.FileDeleteAsyn(fileDeleteReq2, delete_callback);
+    sleep(1);
 
     //目录删除
-    FolderDeleteReq folderDeleteReq(bucket,folder);
+    FolderDeleteReq folderDeleteReq(bucket, folder);
     ret = cos.FolderDelete(folderDeleteReq);
     cout << ret <<endl;
 

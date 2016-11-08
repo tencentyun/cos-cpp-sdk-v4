@@ -52,13 +52,16 @@ namespace boost { namespace threadpool { namespace detail
     shared_ptr<pool_type>      m_pool;     //!< Pointer to the pool which created the worker.
     shared_ptr<boost::thread>  m_thread;   //!< Pointer to the thread which executes the run loop.
 
+	boost::barrier m_start_barrier;        //!< Barrier used to synch the startup of the thread
+
     
     /*! Constructs a new worker. 
     * \param pool Pointer to it's parent pool.
     * \see function create_and_attach
     */
     worker_thread(shared_ptr<pool_type> const & pool)
-    : m_pool(pool)
+    : m_pool(pool),
+	m_start_barrier( 2 )
     {
       assert(pool);
     }
@@ -77,14 +80,29 @@ namespace boost { namespace threadpool { namespace detail
 	  */
 	  void run()
 	  { 
-		  scope_guard notify_exception(bind(&worker_thread::died_unexpectedly, this));
+		  //scope_guard notify_exception(bind(&worker_thread::died_unexpectedly, this));
+		  //self holder, used to prevent deletion of the worker
+		  shared_ptr<worker_thread> self(this->shared_from_this());
 
-		  while(m_pool->execute_task()) {}
+		  //while(m_pool->execute_task()) {}
+		  //signal the create_and_attach method that thread have started and shared pointer to worker
+		   //has been acquired
+			m_start_barrier.wait();
 
-		  notify_exception.disable();
+		  /*notify_exception.disable();
 		  m_pool->worker_destructed(this->shared_from_this());
-	  }
+	  }*/
 
+			scope_guard notify_exception(bind(&worker_thread::died_unexpectedly, this));
+
+			while(m_pool->execute_task()) {}
+
+			notify_exception.disable();
+
+			//After this call there will be one more reference to the worker in m_terminated_workers vector
+			//so the instance of worker will not be destructed when method returns
+			m_pool->worker_destructed(this->shared_from_this());
+		}
 
 	  /*! Joins the worker's thread.
 	  */
@@ -99,12 +117,23 @@ namespace boost { namespace threadpool { namespace detail
 	  */
 	  static void create_and_attach(shared_ptr<pool_type> const & pool)
 	  {
-		  shared_ptr<worker_thread> worker(new worker_thread(pool));
+		  /*shared_ptr<worker_thread> worker(new worker_thread(pool));
 		  if(worker)
 		  {
 			  worker->m_thread.reset(new boost::thread(bind(&worker_thread::run, worker)));
 		  }
-	  }
+	  }*/
+		  shared_ptr<worker_thread> worker(new worker_thread(pool));
+		   if(worker)
+			  {
+				 //Use the real pointer to the worker to prevent holding of the circular references
+				//to the worker in thread object
+					 worker->m_thread.reset(new boost::thread(bind(&worker_thread::run, &*worker)));
+
+				  //Wait until shared pointer to this is acquired in run method
+					worker->m_start_barrier.wait();
+				}
+		 }
 
   };
 
