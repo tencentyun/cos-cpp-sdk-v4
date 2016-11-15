@@ -1,25 +1,25 @@
-1¡¢¿ª·¢»·¾³
-ÒÀÀµ¾²Ì¬¿â: curl jsoncpp boost_system boost_thread  (ÔÚlibÎÄ¼ş¼ĞÏÂ)
-ÒÀÀµ¶¯Ì¬¿â: ssl crypto rt z  (ĞèÒª°²×°)
-(1)°²×°opensslµÄ¿âºÍÍ·ÎÄ¼ş http://www.openssl.org/source/ 
-(2)°²×°curlµÄ¿âºÍÍ·ÎÄ¼ş http://curl.haxx.se/download/curl-7.43.0.tar.gz 
-(3)°²×°jsoncppµÄ¿âºÍÍ·ÎÄ¼ş https://github.com/open-source-parsers/jsoncpp 
-(4)°²×°boostµÄ¿âºÍÍ·ÎÄ¼ş http://www.boost.org/ 
-(5)°²×°cmake¹¤¾ß http://www.cmake.org/download/ 
+1ã€å¼€å‘ç¯å¢ƒ
+ä¾èµ–é™æ€åº“: curl jsoncpp boost_system boost_thread  (åœ¨libæ–‡ä»¶å¤¹ä¸‹)
+ä¾èµ–åŠ¨æ€åº“: ssl crypto rt z  (éœ€è¦å®‰è£…)
+(1)å®‰è£…opensslçš„åº“å’Œå¤´æ–‡ä»¶ http://www.openssl.org/source/ 
+(2)å®‰è£…curlçš„åº“å’Œå¤´æ–‡ä»¶ http://curl.haxx.se/download/curl-7.43.0.tar.gz 
+(3)å®‰è£…jsoncppçš„åº“å’Œå¤´æ–‡ä»¶ https://github.com/open-source-parsers/jsoncpp 
+(4)å®‰è£…boostçš„åº“å’Œå¤´æ–‡ä»¶ http://www.boost.org/ 
+(5)å®‰è£…cmakeå·¥å…· http://www.cmake.org/download/ 
 
-2¡¢±¾µØ±àÒëËµÃ÷£º
-ĞŞ¸ÄCMakeList.txtÎÄ¼şÖĞ£¬Ö¸¶¨±¾µØboostÍ·ÎÄ¼şÂ·¾¶£¬ĞŞ¸ÄÈçÏÂÓï¾ä£º
+2ã€æœ¬åœ°ç¼–è¯‘è¯´æ˜ï¼š
+ä¿®æ”¹CMakeList.txtæ–‡ä»¶ä¸­ï¼ŒæŒ‡å®šæœ¬åœ°boostå¤´æ–‡ä»¶è·¯å¾„ï¼Œä¿®æ”¹å¦‚ä¸‹è¯­å¥ï¼š
 SET(BOOST_HEADER_DIR "/root/boost_1_61_0")
 
-3¡¢ÅäÖÃÎÄ¼şËµÃ÷
-"Region":"sh",                    //ËùÊôCOSÇøÓò£¬ÉÏ´«ÏÂÔØ²Ù×÷µÄURL¾ùÓë¸Ã²ÎÊıÓĞ¹Ø
-"SignExpiredTime":360,            //Ç©Ãû³¬Ê±Ê±¼ä£¬µ¥Î»£ºÃë
-"CurlConnectTimeoutInms":10000,   //CURLÁ¬½Ó³¬Ê±Ê±¼ä£¬µ¥Î»£ººÁÃë
-"CurlGlobalConnectTimeoutInms":360000, //CURLÁ¬½ÓÖ´ĞĞ×î´óÊ±¼ä£¬µ¥Î»£ººÁÃë
-"UploadSliceSize":1048576,        //·ÖÆ¬´óĞ¡£¬µ¥Î»£º×Ö½Ú£¬¿ÉÑ¡µÄÓĞ512k,1M,2M,3M(ĞèÒª»»Ëã³É¶ÔÓ¦×Ö½ÚÊı)
-"IsUploadTakeSha":0,              //ÉÏ´«ÎÄ¼şÊ±ÊÇ·ñĞèÒªĞ¯´øshaÖµ
-"DownloadDomainType":2,           //ÏÂÔØÓòÃûÀàĞÍ£º1: cdn, 2: cos, 3: innercos, 4: self domain
-"SelfDomain":"",                  //×Ô¶¨ÒåÓòÃû
-"UploadThreadPoolSize":5          //µ¥ÎÄ¼ş·ÖÆ¬ÉÏ´«Ïß³Ì³Ø´óĞ¡
-"AsynThreadPoolSize":2            //Òì²½ÉÏ´«ÏÂÔØÏß³Ì³Ø´óĞ¡
-"LogoutType":0                    //´òÓ¡Êä³ö£¬0:²»Êä³ö,1:Êä³öµ½ÆÁÄ»,2:´òÓ¡syslog
+3ã€é…ç½®æ–‡ä»¶è¯´æ˜
+"Region":"sh", Â  Â  Â  Â  Â  Â  Â  Â  Â   //æ‰€å±COSåŒºåŸŸï¼Œä¸Šä¼ ä¸‹è½½æ“ä½œçš„URLå‡ä¸è¯¥å‚æ•°æœ‰å…³,ç›®å‰æ”¯æŒsh,tj,gz,sgp
+"SignExpiredTime":360,            //ç­¾åè¶…æ—¶æ—¶é—´ï¼Œå•ä½ï¼šç§’
+"CurlConnectTimeoutInms":10000,   //CURLè¿æ¥è¶…æ—¶æ—¶é—´ï¼Œå•ä½ï¼šæ¯«ç§’
+"CurlGlobalConnectTimeoutInms":360000, //CURLè¿æ¥æ‰§è¡Œæœ€å¤§æ—¶é—´ï¼Œå•ä½ï¼šæ¯«ç§’
+"UploadSliceSize":1048576,        //åˆ†ç‰‡å¤§å°ï¼Œå•ä½ï¼šå­—èŠ‚ï¼Œå¯é€‰çš„æœ‰512k,1M,2M,3M(éœ€è¦æ¢ç®—æˆå¯¹åº”å­—èŠ‚æ•°)
+"IsUploadTakeSha":0,              //ä¸Šä¼ æ–‡ä»¶æ—¶æ˜¯å¦éœ€è¦æºå¸¦shaå€¼
+"DownloadDomainType":2,           //ä¸‹è½½åŸŸåç±»å‹ï¼š1: cdn, 2: cos, 3: innercos, 4: self domain
+"SelfDomain":"",                  //è‡ªå®šä¹‰åŸŸå
+"UploadThreadPoolSize":5          //å•æ–‡ä»¶åˆ†ç‰‡ä¸Šä¼ çº¿ç¨‹æ± å¤§å°
+"AsynThreadPoolSize":2            //å¼‚æ­¥ä¸Šä¼ ä¸‹è½½çº¿ç¨‹æ± å¤§å°
+"LogoutType":0                    //æ‰“å°è¾“å‡ºï¼Œ0:ä¸è¾“å‡º,1:è¾“å‡ºåˆ°å±å¹•,2:æ‰“å°syslog
