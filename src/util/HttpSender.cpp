@@ -173,7 +173,7 @@ int HttpSender::SendGetRequest(string* pRsp, const string& url,
     if (ret_code == CURLE_OK) {
         ret_code = curl_easy_getinfo(get_curl, CURLINFO_RESPONSE_CODE , &http_code);
     } else {
-        SDK_LOG_ERR("down error, ret_code=%d, full_url=%s, pRsp= %s",ret_code, full_url.c_str(), pRsp.c_str());
+        SDK_LOG_ERR("down error, ret_code=%d, full_url=%s, pRsp= %s",ret_code, full_url.c_str(), pRsp->c_str());
     }
 
     curl_slist_free_all(header_lists);
