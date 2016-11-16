@@ -52,9 +52,9 @@ typedef enum cos_log_level{
 
 #define COS_LOW_LOGPRN(level, fmt, ...) \
     if (CosSysConfig::getLogOutType()== COS_LOG_STDOUT) { \
-       fprintf(stdout,"%s:%s(%d) " fmt "%s\n", LOG_LEVEL_STRING(level),__func__,__LINE__, __VA_ARGS__); \
+       fprintf(stdout,"time:%lu,%s:%s(%d) " fmt "%s\n", time(NULL), LOG_LEVEL_STRING(level),__func__,__LINE__, __VA_ARGS__); \
     }else if (CosSysConfig::getLogOutType() == COS_LOG_SYSLOG){ \
-       syslog(LOG_INFO,"%s:%s(%d) " fmt "%s\n", LOG_LEVEL_STRING(level),__func__,__LINE__, __VA_ARGS__); \
+       syslog(LOG_INFO,"time:%lu,%s:%s(%d) " fmt "%s\n", time(NULL), LOG_LEVEL_STRING(level),__func__,__LINE__, __VA_ARGS__); \
     } else { \
     }        \
 
