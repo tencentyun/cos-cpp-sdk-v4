@@ -9,7 +9,7 @@
 	"UploadSliceSize":1048576,
 	"L5ModID":-1,
 	"L5CmdID":-1,
-	"IsUploadTakeSha":1,
+	"IsUploadTakeSha":0,
 	"DownloadDomainType":2,
 	"SelfDomain":"",
 	"UploadThreadPoolSize":5,

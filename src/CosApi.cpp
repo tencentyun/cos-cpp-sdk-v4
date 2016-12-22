@@ -41,6 +41,11 @@ string CosAPI::FileDelete(FileDeleteReq& request)
     return fileOp.FileDelete(request);
 }
 
+string CosAPI::FileMove(FileMoveReq& request)
+{
+    return fileOp.FileMove(request);
+}
+
 bool CosAPI::FileDeleteAsyn(FileDeleteReq& req, DeleteCallback callback, void* user_data) {
     return fileOp.FileDeleteAsyn(fileOp, req, callback, user_data);
 }

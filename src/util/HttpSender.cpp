@@ -293,7 +293,7 @@ string HttpSender::SendSingleFilePostRequest(const string &url,
     curl_slist_free_all(header_lists);
     curl_easy_cleanup(file_curl);
 
-    
+
     if (ret_code != CURLE_OK) {
         SDK_LOG_ERR("sendSingleFilePost error! url: %s",url.c_str());
 #ifdef __USE_L5
@@ -305,7 +305,7 @@ string HttpSender::SendSingleFilePostRequest(const string &url,
         return CosResult(NETWORK_ERROR_CODE,NETWORK_ERROR_DESC).toJsonString();
     }
 
-#ifdef __USE_L5 
+#ifdef __USE_L5
     int64_t l5_modid = CosSysConfig::getL5Modid();
     int64_t l5_cmdid = CosSysConfig::getL5Cmdid();
     L5EndpointProvider::UpdateRouterResult(url, l5_modid, l5_cmdid,

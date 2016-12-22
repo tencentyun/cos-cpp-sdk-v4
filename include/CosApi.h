@@ -7,6 +7,7 @@
 #include "request/FileStatReq.h"
 #include "request/FileDeleteReq.h"
 #include "request/FileUpdateReq.h"
+#include "request/FileMoveReq.h"
 #include "request/FolderCreateReq.h"
 #include "request/FolderStatReq.h"
 #include "request/FolderDeleteReq.h"
@@ -42,6 +43,8 @@ class CosAPI
         string FileStat(FileStatReq& req);
         //文件删除
         string FileDelete(FileDeleteReq& req);
+        // 文件移动
+        string FileMove(FileMoveReq& req);
         // 异步删除文件
         bool FileDeleteAsyn(FileDeleteReq& req, DeleteCallback callback, void* user_data = NULL);
         //文件更新

@@ -243,8 +243,8 @@ void FileDelete_Asyn_Thread(Delete_Asyn_Arg arg)
     string rsp = op->FileDelete(req);
     Json::Value root_json = StringUtil::StringToJson(rsp);
     int code = -1;
-    if (root_json.isMember("data")) {
-        code = root_json["data"].asInt();
+    if (root_json.isMember("code")) {
+        code = root_json["code"].asInt();
     }
 
     if (callback){
