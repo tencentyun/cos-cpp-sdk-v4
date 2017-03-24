@@ -51,7 +51,7 @@ void CosSysConfig::print_value()
     std::cout << "m_threadpool_size:" << m_threadpool_size << std::endl;
     std::cout << "log_outtype:" << log_outtype << std::endl;
     std::cout << "domainType:" << domainType << std::endl;
-    std::cout << "downloadDomain:" << downloadDomain << std::endl; 
+    std::cout << "downloadDomain:" << downloadDomain << std::endl;
     std::cout << "threadpool_size:" << m_threadpool_size << std::endl;
     std::cout << "asyn_threadpool_size:" << m_asyn_threadpool_size << std::endl;
     std::cout << "log_outtype:" << log_outtype << std::endl;
@@ -75,7 +75,7 @@ void CosSysConfig::setDownThreadPoolMaxSize(unsigned size)
     if (size > 10) {
         m_down_thread_pool_max_size = 10;
     } else if (size < 1) {
-        m_down_thread_pool_max_size = 1;        
+        m_down_thread_pool_max_size = 1;
     } else {
         m_down_thread_pool_max_size = size;
     }
@@ -136,13 +136,12 @@ void CosSysConfig::setUploadThreadPoolSize(unsigned size)
 
 void CosSysConfig::setAsynThreadPoolSize(unsigned size)
 {
-    if ( size > MAX_THREAD_POOL_SIZE_UPLOAD_SLICE ) {
-        m_asyn_threadpool_size = MAX_THREAD_POOL_SIZE_UPLOAD_SLICE;
-    } else if (size < MIN_THREAD_POOL_SIZE_UPLOAD_SLICE) {
+    // 异步线程池不设置上限
+    if (size < MIN_THREAD_POOL_SIZE_UPLOAD_SLICE) {
         m_asyn_threadpool_size = MIN_THREAD_POOL_SIZE_UPLOAD_SLICE;
-    } else {
-        m_asyn_threadpool_size = size;
+        return;
     }
+    m_asyn_threadpool_size = size;
 }
 
 unsigned CosSysConfig::getAsynThreadPoolSize()
@@ -171,16 +170,16 @@ void CosSysConfig::setRegionAndDLDomain(string region, DLDomainType type, string
     m_uploadDomain = "http://" + region + ".file.myqcloud.com/files/v2/";
     CosSysConfig::domainType = type;
     switch (type){
-        case DOMAIN_CDN: 
+        case DOMAIN_CDN:
             downloadDomain = DOWN_ULR_CDN;
             break;
-        case DOMAIN_COS: 
+        case DOMAIN_COS:
             downloadDomain = "cos" + region + ".myqcloud.com";
             break;
-        case DOMAIN_INNER_COS: 
+        case DOMAIN_INNER_COS:
             downloadDomain = DOWN_ULR_INNER_COS;
             break;
-        case DOMAIN_SELF_DOMAIN: 
+        case DOMAIN_SELF_DOMAIN:
             downloadDomain = domain;
             break;
         default:
