@@ -2,7 +2,11 @@ cmake_minimum_required(VERSION 2.8)
 CMAKE_policy(SET CMP0015 NEW)
 
 project(cos-cpp-sdk)
-SET(BOOST_HEADER_DIR "/root/boost_1_61_0")  
+SET(BOOST_HEADER_DIR "/root/boost_1_61_0")
+# find_package自动查找，或者通过SET(OPENSSL_VERSION 1.0.0)人工设置
+find_package(OpenSSL REQUIRED)
+#SET(OPENSSL_VERSION 1.0.1e)
+message(${OPENSSL_VERSION})
 
 include_directories(./include)
 include_directories(${BOOST_HEADER_DIR})
