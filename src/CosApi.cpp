@@ -2,6 +2,7 @@
 #include <string>
 #include "curl/curl.h"
 #include "threadpool/boost/threadpool.hpp"
+#include "util/threadsafe_openssl.h"
 #include "CosApi.h"
 using std::string;
 namespace qcloud_cos {
@@ -100,7 +101,7 @@ int CosAPI::COS_Init() {
             SDK_LOG_ERR("curl_global_init error, retcode=%d",retCode);
             return -1;
         }
-
+        openssl_thread_setup();
         threadpool = new boost::threadpool::pool(CosSysConfig::getAsynThreadPoolSize());
     }
 
@@ -112,6 +113,7 @@ void CosAPI::COS_UInit() {
     --cos_obj_num;
     if (g_init && cos_obj_num == 0) {
         curl_global_cleanup();
+        openssl_thread_cleanup();
 
         if (threadpool){
             threadpool->wait();
