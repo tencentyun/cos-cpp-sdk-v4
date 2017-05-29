@@ -107,6 +107,19 @@ bool CosConfig::InitConf(const std::string& config_file) {
     if (root.isMember("down_slice_size")) {
         CosSysConfig::setDownSliceSize((root["down_slice_size"].asUInt()));
     }
+
+    // 长连接相关
+    if (root.isMember("keepalive_mode")) {
+        bool keepalive_mode = (root["keepalive_mode"].asInt() == 0 ? false : true);
+        CosSysConfig::setKeepAlive(keepalive_mode);
+    }
+    if (root.isMember("keepalive_idle_time")) {
+        CosSysConfig::setKeepIdle(root["keepalive_idle_time"].asInt());
+    }
+    if (root.isMember("keepalive_interval_time")) {
+        CosSysConfig::setKeepIntvl(root["keepalive_interval_time"].asInt());
+    }
+
     CosSysConfig::print_value();
     return true;
 }

@@ -37,6 +37,11 @@ unsigned CosSysConfig::m_down_slice_size = 4*1024*1024;
 DLDomainType  CosSysConfig::domainType = DOMAIN_CDN;
 string  CosSysConfig::downloadDomain = DOWN_ULR_CDN;
 
+// 长连接
+bool CosSysConfig::m_keep_alive = false;
+int64_t CosSysConfig::m_keep_idle = 20;
+int64_t CosSysConfig::m_keep_intvl = 5;
+
 void CosSysConfig::print_value()
 {
     std::cout << "region:" << m_region << std::endl;
@@ -57,12 +62,27 @@ void CosSysConfig::print_value()
     std::cout << "log_outtype:" << log_outtype << std::endl;
     std::cout << "down_thread_pool_max_size:" << m_down_thread_pool_max_size << std::endl;
     std::cout << "down_slice_size:" << m_down_slice_size << std::endl;
+    std::cout << "keepalive:" << m_keep_alive << std::endl;
+    std::cout << "keepidle:" << m_keep_idle << std::endl;
+    std::cout << "keepintvl:" << m_keep_intvl << std::endl;
 
 }
 
 void CosSysConfig::setIsTakeSha(bool isTakeSha)
 {
     takeSha = isTakeSha;
+}
+
+void CosSysConfig::setKeepAlive(bool keepalive) {
+    m_keep_alive = keepalive;
+}
+
+void CosSysConfig::setKeepIdle(int64_t keepidle) {
+    m_keep_idle = keepidle;
+}
+
+void CosSysConfig::setKeepIntvl(int64_t keepintvl) {
+    m_keep_intvl = keepintvl;
 }
 
 void CosSysConfig::setSliceSize(uint64_t slice_size)
@@ -100,6 +120,18 @@ unsigned CosSysConfig::getDownThreadPoolMaxSize()
 unsigned CosSysConfig::getDownSliceSize()
 {
     return m_down_slice_size;
+}
+
+bool CosSysConfig::getKeepAlive() {
+    return m_keep_alive;
+}
+
+int64_t CosSysConfig::getKeepIdle() {
+    return m_keep_idle;
+}
+
+int64_t CosSysConfig::getKeepIntvl() {
+    return m_keep_intvl;
 }
 
 void CosSysConfig::setExpiredTime(uint64_t time)

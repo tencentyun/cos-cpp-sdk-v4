@@ -52,6 +52,12 @@ CURL *HttpSender::CurlEasyHandler(const string &url, string *rsp,
     curl_easy_setopt(easy_curl, CURLOPT_SSL_VERIFYHOST, 0);
     curl_easy_setopt(easy_curl, CURLOPT_SSL_VERIFYPEER, 1);
 
+    if (CosSysConfig::getKeepAlive()) {
+        curl_easy_setopt(easy_curl, CURLOPT_TCP_KEEPALIVE, 1L);
+        curl_easy_setopt(easy_curl, CURLOPT_TCP_KEEPIDLE, 20L);
+        curl_easy_setopt(easy_curl, CURLOPT_TCP_KEEPINTVL, 5L);
+    }
+
     if (is_post) {
         curl_easy_setopt(easy_curl, CURLOPT_POST, 1);
     }

@@ -9,7 +9,7 @@ namespace qcloud_cos{
 
 
 class CosSysConfig {
-   
+
 public:
     //设置签名超时时间,单位:秒
     static void setExpiredTime(uint64_t time);
@@ -37,6 +37,11 @@ public:
     static void setDownThreadPoolMaxSize(unsigned size);
     static void setDownSliceSize(unsigned slice_size);
 
+    // 设置长连接的参数
+    static void setKeepAlive(bool keepalive);
+    static void setKeepIdle(int64_t keepidle);
+    static void setKeepIntvl(int64_t keepintvl);
+
     static uint64_t getExpiredTime();
     static uint64_t getTimeoutInms();
     static uint64_t getGlobalTimeoutInms();
@@ -53,6 +58,10 @@ public:
     static void print_value();
     static unsigned getDownSliceSize();
     static unsigned getDownThreadPoolMaxSize();
+
+    static bool getKeepAlive();
+    static int64_t getKeepIdle();
+    static int64_t getKeepIntvl();
 
 private:
     //打印日志:0,不打印,1:打印到屏幕,2:打印到syslog
@@ -84,7 +93,13 @@ private:
     //下载文件到本地线程池大小
     static unsigned m_down_thread_pool_max_size;
     //下载文件到本地,每次下载字节数
-    static unsigned m_down_slice_size;    
+    static unsigned m_down_slice_size;
+    // 是否开启长连接
+    static bool m_keep_alive;
+    // 空闲多久后，发送keepalive探针，单位s
+    static int64_t m_keep_idle;
+    // 每个keepalive探针时间间隔，单位s
+    static int64_t m_keep_intvl;
 };
 
 }
