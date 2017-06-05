@@ -65,6 +65,14 @@ int FileOp::FileDownload(FileDownloadReq& req, string localPath, int* ret_code)
         url = HttpUtil::GetEncodedDownloadCosUrl(CosSysConfig::getDownloadDomain(),req.getFilePath(),sign);
     }
 
+
+    int fd = open(localPath.c_str(), O_WRONLY | O_CREAT | O_TRUNC, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);    
+    if (fd == -1) {
+        SDK_LOG_ERR("open file(%s) fail, errno=%d",localPath.c_str(), errno);
+        *ret_code = -1;
+        return 0;
+    }
+
     unsigned pool_size = CosSysConfig::getDownThreadPoolMaxSize();
     unsigned slice_size = CosSysConfig::getDownSliceSize();
     unsigned max_task_num = filesize / slice_size + 1;
@@ -85,15 +93,8 @@ int FileOp::FileDownload(FileDownloadReq& req, string localPath, int* ret_code)
 
     SDK_LOG_DBG("upload data,url=%s, poolsize=%u,slice_size=%u,filesize=%lu",url.c_str(), pool_size, slice_size, filesize);
 
-    int fd = open(localPath.c_str(), O_WRONLY | O_CREAT | O_TRUNC, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);    
-    if (fd == -1) {
-        SDK_LOG_ERR("open file(%s) fail, errno=%d",localPath.c_str(), errno);
-        *ret_code = -1;
-        return 0;
-    }
-
     std::vector<uint64_t> vec_offset;
-    vec_offset.reserve(pool_size);
+    vec_offset.resize(pool_size);
     boost::threadpool::pool tp(pool_size);
     uint64_t offset =0;
     bool task_fail_flag = false;
@@ -146,6 +147,10 @@ int FileOp::FileDownload(FileDownloadReq& req, string localPath, int* ret_code)
 
     //释放所有资源
     close(fd);
+    for(unsigned i = 0; i < pool_size; i++){
+        delete [] fileContentBuf[i];
+        delete pptaskArr[i];
+    }
     delete [] pptaskArr;
     delete [] fileContentBuf;
     *ret_code = 0;

@@ -3,6 +3,7 @@ CMAKE_policy(SET CMP0015 NEW)
 
 project(cos-cpp-sdk)
 SET(BOOST_HEADER_DIR "/root/boost_1_61_0")
+SET(CMAKE_VERBOSE_MAKEFILE  ON)
 # find_package自动查找，或者通过SET(OPENSSL_VERSION 1.0.0)人工设置
 find_package(OpenSSL REQUIRED)
 #SET(OPENSSL_VERSION 1.0.1e)
@@ -14,6 +15,7 @@ include_directories(${BOOST_HEADER_DIR})
 link_directories(./lib)
 
 option(CMAKE_BUILD_TYPE "Release")
+set(CMAKE_CXX_FLAGS "$ENV{CMAKE_CXX_FLAGS} -D_FILE_OFFSET_BITS=64")
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     message("debug mode")
     set(CMAKE_CXX_FLAGS "$ENV{CMAKE_CXX_FLAGS} -O0 -Wall -g")
