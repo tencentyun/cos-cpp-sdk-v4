@@ -84,12 +84,6 @@ int main()
     CosConfig config("config.json");
     CosAPI cos(config);
 
-    FileDownloadReq fileDownloadReq(bucket,dstpath);
-    int ret_code;
-    uint64_t size = cos.FileDownload(fileDownloadReq, "./aaa", &ret_code);
-    cout << "size =" << size << std::endl;
-
-/*
     //从本地文件中上传文件(异步上传)
     FileUploadReq fileUploadReq1(bucket,srcpath, dstpath);
     //设置允许同名文件覆盖
@@ -185,7 +179,6 @@ int main()
     FolderDeleteReq folderDeleteReq(bucket, folder);
     ret = cos.FolderDelete(folderDeleteReq);
     cout << ret <<endl;
-*/
     return 0;
 }
 
