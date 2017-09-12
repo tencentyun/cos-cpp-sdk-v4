@@ -1,13 +1,16 @@
-#include <string.h>
-#include <stdint.h>
-#include <map>
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <fcntl.h>
-#include <string>
-#include "op/FileOp.h"
-#include "Auth.h"
+#include <stdint.h>
+#include <string.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+
 #include <boost/bind.hpp>
+#include <map>
+#include <string>
+
+#include "Auth.h"
+#include "util/FileUtil.h"
+#include "op/FileOp.h"
 #include "threadpool/boost/threadpool.hpp"
 
 using std::string;
@@ -39,7 +42,7 @@ int FileOp::FileDownload(FileDownloadReq& req, string localPath, int* ret_code)
         *ret_code = -1;
         return 0;
     }
-    
+
     uint64_t filesize = 0;
     Json::Value &data = statrsp_json["data"];
     if (!data.isMember("filesize")) {
@@ -66,7 +69,7 @@ int FileOp::FileDownload(FileDownloadReq& req, string localPath, int* ret_code)
     }
 
 
-    int fd = open(localPath.c_str(), O_WRONLY | O_CREAT | O_TRUNC, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);    
+    int fd = open(localPath.c_str(), O_WRONLY | O_CREAT | O_TRUNC, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
     if (fd == -1) {
         SDK_LOG_ERR("open file(%s) fail, errno=%d",localPath.c_str(), errno);
         *ret_code = -1;
@@ -135,7 +138,7 @@ int FileOp::FileDownload(FileDownloadReq& req, string localPath, int* ret_code)
                     task_fail_flag = true;
                     break;
                 }
-                
+
                 SDK_LOG_DBG("down data, down_times=%u,task_index=%d, filesize=%lu, offset=%lu, downlen:%lu ", down_times,task_index, filesize, vec_offset[task_index], ptask->getDownLoadLen());
             }
         }
@@ -231,6 +234,14 @@ int FileOp::FileDownload(FileDownloadReq& req, char* buffer, size_t bufLen, uint
 //文件上传
 string FileOp::FileUpload(FileUploadReq& req)
 {
+    if (!FileUtil::IsLegalFilePath(req.getDstPath())) {
+        Json::Value rsp_json;
+        rsp_json["code"] = PARA_ERROR_CODE;
+        rsp_json["message"] = "Cos file path could not end with '/', "
+            "would you want to create folder? try FolderCreate function.";
+        rsp_json["data"] = "";
+        return StringUtil::JsonToString(rsp_json);
+    }
     if (req.getFileSize() < SINGLE_FILE_SIZE) {
         return FileUploadSingle(req);
     } else {
