@@ -12,6 +12,7 @@
 #include <iostream>
 #include "gtest/gtest.h"
 
+#include "Common.h"
 #include "CosApi.h"
 #include "CosConfig.h"
 #include "op/FileOp.h"
@@ -66,6 +67,11 @@ protected:
     static void SetUpTestCase() {
         std::cout << "================SetUpTestCase Begin====================" << std::endl;
         m_config = new CosConfig("./config.json");
+        std::string appid = GetEnv("CPP_SDK_V4_APPID");
+        m_config->setAppid(strtoull(appid.c_str(), NULL, 10));
+        m_config->setSecretId(GetEnv("CPP_SDK_V4_SECRET_ID"));
+        m_config->setSecretKey(GetEnv("CPP_SDK_V4_SECRET_KEY"));
+        m_bucket_name += GetEnv("COS_CPP_V4_TAG");
         m_client = new CosAPI(*m_config);
         std::cout << "================SetUpTestCase End====================" << std::endl;
     }
@@ -184,12 +190,5 @@ TEST_F(FileOpTest, FileAsynDeleteTest) {
     EXPECT_TRUE(ret);
     EXPECT_EQ(0, test_data.m_age);
 }
-
-#if 0
-TEST_F(FileOpTest, FileUploadAsyncTest) {
-}
-TEST_F(FileOpTest, FileDownloadAsyncTest) {
-}
-#endif
 
 } // namespace qcloud_cos

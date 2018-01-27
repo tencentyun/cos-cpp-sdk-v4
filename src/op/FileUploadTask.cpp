@@ -9,13 +9,13 @@ using std::string;
 using std::map;
 namespace qcloud_cos{
 
-FileUploadTask::FileUploadTask(const string& url, const string& session, 
+FileUploadTask::FileUploadTask(const string& url, const string& session,
         const string& sign, const string& sha) : m_url(url), m_session(session), m_sign(sign), m_sha(sha)
 {
 }
 
-FileUploadTask::FileUploadTask(const string& url, const string& session, 
-        const string& sign, const string& sha, uint64_t offset, 
+FileUploadTask::FileUploadTask(const string& url, const string& session,
+        const string& sign, const string& sha, uint64_t offset,
         unsigned char* pbuf, const size_t datalen) : m_url(url), m_session(session), m_sign(sign), m_sha(sha), m_offset(offset), m_pdatabuf(pbuf), m_datalen(datalen), m_resp(""), m_task_success(false)
 {
     SDK_LOG_DBG("constructor");
@@ -60,7 +60,7 @@ void FileUploadTask::uploadTask()
     if (CosSysConfig::isTakeSha()){
         user_params[PARA_SHA] = m_sha;
     }
-    
+
     do {
         loop++;
         m_resp = HttpSender::SendSingleFilePostRequest(m_url,user_headers,
@@ -69,11 +69,19 @@ void FileUploadTask::uploadTask()
         Json::Value dataRspJson = StringUtil::StringToJson(m_resp);
         if (dataRspJson["code"].asInt() == 0){
             m_task_success = true;
+#if __WORDSIZE == 32
+            SDK_LOG_DBG("file upload task success,offset=%llu, len=%lu, m_task_success: %d", m_offset, m_datalen, m_task_success);
+#else
             SDK_LOG_DBG("file upload task success,offset=%lu, len=%lu, m_task_success: %d", m_offset, m_datalen, m_task_success);
+#endif
             break;
         } else {
             m_task_success = false;
+#if __WORDSIZE == 32
+            SDK_LOG_ERR("file upload task fail, offset=%llu, len=%lu, retry_index: %d,  response: %s",m_offset, m_datalen, loop, m_resp.c_str());
+#else
             SDK_LOG_ERR("file upload task fail, offset=%lu, len=%lu, retry_index: %d,  response: %s",m_offset, m_datalen, loop, m_resp.c_str());
+#endif
         }
     } while (loop <= 1);//kMaxRetryTimes);
 
