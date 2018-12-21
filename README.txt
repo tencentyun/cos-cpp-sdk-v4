@@ -1,4 +1,10 @@
-1、开发环境
+# tencentyun-cos-cpp-sdk-v4
+
+## 已弃用 - 请升级到 cos-cpp-sdk-v5
+SDK 依赖的 JSON API 已弃用，请直接使用基于 XML API 的 [cos-cpp-sdk-v5](https://github.com/tencentyun/cos-cpp-sdk-v5)，或者参照 [升级指引](https://cloud.tencent.com/document/product/436/31354) 升级到新版SDK。
+
+## 开发环境
+
 依赖静态库: curl jsoncpp boost_system boost_thread  (在lib文件夹下)
 依赖动态库: ssl crypto rt z  (需要安装)
 (1)安装openssl的库和头文件 http://www.openssl.org/source/ 
@@ -7,11 +13,13 @@
 (4)安装boost的库和头文件 http://www.boost.org/ 
 (5)安装cmake工具 http://www.cmake.org/download/ 
 
-2、本地编译说明：
+## 本地编译说明
+
 修改CMakeList.txt文件中，指定本地boost头文件路径，修改如下语句：
 SET(BOOST_HEADER_DIR "/root/boost_1_61_0")
 
-3、配置文件说明
+## 配置文件说明
+
 "Region":"sh",                    //所属COS区域，上传下载操作的URL均与该参数有关
 "SignExpiredTime":360,            //签名超时时间，单位：秒
 "CurlConnectTimeoutInms":10000,   //CURL连接超时时间，单位：毫秒
